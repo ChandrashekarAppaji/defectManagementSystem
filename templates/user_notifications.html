@@ -1,0 +1,22 @@
+{% include "user_head.html" %}
+<div class="mt-130">
+    <div class="w-95 ml-30 mr-30">
+        {% for notification in notifications  %}
+        <div class="card mt-20 p-20">
+            <div class="flex space-between">
+                <div class="flex">
+                    <div class="bold">Notification Title:</div>
+                    <div class="ml-10 ">{{notification['notification_title']}} </div>
+                </div>
+                <div>
+                     <div class="ml-10 bold">{{notification['date'].strftime("%Y-%m-%d %I:%M %p")}}</div>
+                </div>
+            </div>
+            <div>
+                 <div class="bold">Notification Description:</div>
+                 <div class="ml-10">{{notification['notification_description']}}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>

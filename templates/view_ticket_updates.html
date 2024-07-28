@@ -1,0 +1,34 @@
+{% if session['role'] == 'user' %}
+{% include "user_head.html" %}
+{% endif %}
+
+{% if session['role'] == 'manager' %}
+{% include "manager_head.html" %}
+{% endif %}
+
+{% if session['role'] == 'developer' %}
+{% include "developer_head.html" %}
+{% endif %}
+<div class="mt-110">
+    <div class="card-label">View Ticket Updates</div>
+</div>
+
+<div class="mt-20 ">
+    <div class="w-50">
+        {% for ticket_update in ticket_updates %}
+        <div class="card p-20 ml-10">
+            <div class="flex space-around">
+                <div>
+                     <div class="">Ticket Update:</div>
+                     <div class="ml-10 txt-blue">{{ticket_update['update']}}</div>
+                </div>
+                <div class="mb-10">
+                     <div class="">Date:</div>
+                     <div class="ml-10 txt-blue">{{ticket_update['date'].strftime("%y-%m-%d %I:%M %p")}}</div>
+                </div>
+            </div>
+            <hr>
+        </div>
+        {% endfor %}
+    </div>
+</div>

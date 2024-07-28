@@ -1,0 +1,39 @@
+{% include "admin_head.html" %}
+<div class="mt-110">
+    <div class="card-label">View Managers</div>
+</div>
+
+<div class="mt-10">
+    <div class="row space-around">
+        <div class="w-90">
+            <div class="card mt-20 p-20">
+                <table class="table w-100">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Experience</th>
+                        <th>Skills</th>
+                        <th>Address</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Zip Code</th>
+                    </tr>
+                    {% for developer in developers %}
+                    <tr>
+                        <td>{{developer['first_name']}} {{developer['last_name']}}</td>
+                        <td>{{developer['email']}}</td>
+                        <td>{{developer['phone']}}</td>
+                        <td>{{developer['experience']}}</td>
+                        <td>{{developer['skills']}}</td>
+                        <td>{{developer['address']}}</td>
+                        <td>{{developer['city']}}</td>
+                        <td>{{developer['state']}}</td>
+                        <td>{{developer['zip_code']}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

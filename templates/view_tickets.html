@@ -1,0 +1,204 @@
+{% if session['role'] == 'user' %}
+{% include "user_head.html" %}
+{% endif %}
+
+{% if session['role'] == 'manager' %}
+{% include "manager_head.html" %}
+{% endif %}
+
+{% if session['role'] == 'developer' %}
+{% include "developer_head.html" %}
+{% endif %}
+<div class="mt-110">
+    <div class="card-label">View Tickets</div>
+</div>
+
+<div class="mt-10">
+    <div class="space-between">
+        <div class="row">
+           <div class="w-100 ">
+           {% for ticket in tickets %}
+             {% if "manager_id" in ticket %}
+             {% set manager = get_ticket_by_manager_id(ticket['manager_id']) %}
+             {% endif %}
+             {% if "developer_id" in ticket %}
+             {% set developer = get_ticket_by_developer_id(ticket['developer_id']) %}
+             {% endif %}
+             {% set user = get_ticket_by_user_id(ticket['user_id']) %}
+             <div class="card p-10 ml-10 mr-10 mt-30">
+                 <div class="flex gap-20">
+                     <div class="">
+                         <div>
+                              <div> <img src="../static/raise_ticket_images/{{ticket['picture']}}" style="max-width:100%; height:200px;"></div>
+                         </div>
+                     </div>
+                     <div class="w-25">
+                         <div class="">
+                             <div class="">
+                                  <div>
+                                     <div class="">Ticket Title:</div>
+                                     <div class="ml-10 txt-blue">{{ticket['ticket_title']}}</div>
+                                 </div>
+                                 {% if "manager_id" in ticket %}
+                                 <div>
+                                     <div class="">Manager Name:</div>
+                                     <div class="ml-10 txt-blue">{{manager['first_name']}} {{manager['last_name']}}</div>
+                                 </div>
+                                 <div>
+                                     <div class="">Email:</div>
+                                     <div class="ml-10 txt-blue">{{manager['email']}}</div>
+                                 </div>
+                                 <div>
+                                     <div class="">Phone:</div>
+                                     <div class="ml-10 txt-blue">{{manager['phone']}}</div>
+                                 </div>
+                                 {% endif %}
+                                 <div class="">
+                                     <div class="mt-20">
+                                         <div class="">Description:</div>
+                                         <div class="ml-10 txt-blue">{{ticket['description']}}</div>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                     <div class="mt-60">
+                         {% if "developer_id" in ticket %}
+                         <div>
+                             <div class="">Developer Name:</div>
+                             <div class="ml-10 txt-blue">{{developer['first_name']}} {{developer['last_name']}}</div>
+                         </div>
+                         <div>
+                             <div class="">Email:</div>
+                             <div class="ml-10 txt-blue">{{developer['email']}}</div>
+                         </div>
+                         <div>
+                             <div class="">Phone:</div>
+                             <div class="ml-10 txt-blue">{{developer['phone']}}</div>
+                         </div>
+                         {% endif%}
+                     </div>
+                      <div class="mt-60">
+                         <div>
+                             <div class="">User Name:</div>
+                             <div class="ml-10 txt-blue">{{user['first_name']}} {{user['last_name']}}</div>
+                         </div>
+                         <div>
+                             <div class="">Email:</div>
+                             <div class="ml-10 txt-blue">{{user['email']}}</div>
+                         </div>
+                         <div>
+                             <div class="">Phone:</div>
+                             <div class="ml-10 txt-blue">{{user['phone']}}</div>
+                         </div>
+                     </div>
+                     {% if session['role'] == 'manager' %}
+                       {% if ticket['status']=='Ticket Raise' %}
+                         <div class="mt-165">
+                            <div class=""><a href="accept_ticket?ticket_id={{ticket['_id']}}" class="btn">Accept Ticket</a></div>
+                         </div>
+                         <div class="mt-165">
+                            <div class=""><a href="reject_ticket?ticket_id={{ticket['_id']}}" class="btn">Reject Ticket</a></div>
+                         </div>
+                       {% endif %}
+                       {% if ticket['status']=='Ticket Accepted' %}
+                         <div class="mt-20">
+                            <div class=""><a href="assign_to_developer?ticket_id={{ticket['_id']}}" class="btn">Assign Developer</a></div>
+                         </div>
+                       {% endif %}
+                        {% if ticket['status']=='Ticket Assigned to Developer',ticket['status']=='Ticket In Process' %}
+                             <div class="mt-165 ml-10">
+                                <div class=""><a href="close_ticket?ticket_id={{ticket['_id']}}" class="btn">Close Ticket</a></div>
+                             </div>
+                        {% endif %}
+                     {% endif %}
+                     {% if session['role'] == 'developer' %}
+                        {% if ticket['status']=='Ticket Assigned to Developer', ticket['status']=='Ticket In Process'%}
+                         <div class="mt-120">
+                            <div class=""><a href="close_ticket?ticket_id={{ticket['_id']}}" class="btn">Close Ticket</a></div>
+                           {% if ticket['status']=='Ticket Assigned to Developer' %}
+                           <div class="mt-10">
+                             <div class=""><a href="ticket_in_process?ticket_id={{ticket['_id']}}" class="btn">Ticket In Process</a></div>
+                           </div>
+                           {% endif %}
+                         {% endif %}
+                         </div>
+                     {% endif %}
+                     <div>
+                         <div>
+                             <div class="">Status:</div>
+                             <div class="ml-10 txt-green">{{ticket['status']}}</div>
+                         </div>
+                       {% if session['role'] == 'developer' %}
+                         <div class="mt-80">
+                             <div class=""><a href="add_ticket_update?ticket_id={{ticket['_id']}}" class="btn"> Add Ticket Updates</a></div>
+                          </div>
+                         <div class="mt-10">
+                             <div class=""><a href="view_ticket_updates?ticket_id={{ticket['_id']}}" class="btn">View Ticket Updates</a></div>
+                         </div>
+                       {% endif %}
+                        {% if session['role'] == 'user' or session['role'] == 'manager' %}
+                         <div class="mt-120">
+                             <div class=""><a href="view_ticket_updates?ticket_id={{ticket['_id']}}" class="btn">View Ticket Updates</a></div>
+                         </div>
+                         {% endif %}
+                     </div>
+                 </div>
+                 <div class="mt-20">
+                     <form action="add_comment_action" class="flex">
+                         <input type="hidden" name="ticket_id" value="{{ticket['_id']}}">
+                         <div class="w-80">
+                             <div class="">
+                                 <input type="text" name="comment" id="comment" class="form-input" placeholder="Add a comment here....">
+                             </div>
+                         </div>
+                         <div class="w-20">
+                             <div class="">
+                                 <input type="submit" class="btn w-100  btn-primary " value="Add Comment">
+                             </div>
+                         </div>
+                    </form>
+                     <div class="w-100 ">
+                         <div class="card p-20">
+                             <div><h3>Comments</h3></div>
+                             {% for comment in ticket['comments'] %}
+
+
+                             <div class="mt-20 row space-between">
+                                 <div class="flex">
+                                     <div class="bold">Commented By:</div>
+                                      {% if 'developer_id' in comment %}
+                                     {% set developer = get_developer_by_developer_id(comment['developer_id']) %}
+                                         <div class="ml-10 bold">{{developer['first_name']}} {{developer['last_name']}}({{comment['role']}})</div>
+                                     {% elif 'manager_id' in comment%}
+                                     {% set manager = get_manager_by_manager_id(comment['manager_id']) %}
+                                      <div class="ml-10 bold">{{manager['first_name']}} {{manager['last_name']}} ({{comment['role']}})</div>
+                                     {% elif 'user_id' in comment%}
+                                     {% set user = get_user_by_user_id(comment['user_id']) %}
+                                      <div class="ml-10 bold">{{user['first_name']}} {{user['last_name']}} ({{comment['role']}})</div>
+                                     {% endif%}
+                                 </div>
+                                 <div class="">
+                                     <div class="flex">
+                                         <div class="">Commented On:</div>
+                                         <div class="ml-10 bold">{{comment['date'].strftime("%Y-%m-%d %I:%M %p")}}</div>
+                                     </div>
+                                 </div>
+                             </div>
+                             <div class="mt-10">
+                                 <div class="">
+                                     <div class="ml-10 mb-10">{{comment['comment']}}</div>
+                                 </div>
+                             </div>
+                             <hr>
+                             {% endfor%}
+                         </div>
+                     </div>
+                 </div>
+             </div>
+           {% endfor %}
+           </div>
+        </div>
+    </div>
+</div>
+

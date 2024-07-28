@@ -1,0 +1,23 @@
+{% include 'developer_head.html' %}
+
+<div class="mt-120">
+    <div class=" ">
+        <div class="w-30 margin-auto">
+            <div class="card p-20">
+                <form action="add_ticket_update_action">
+                    <input type="hidden" name="ticket_id" value="{{ticket_id}}">
+                    <div class="">
+                         <div class="card-label mt-40">Add Ticket Updates </div>
+                    </div>
+                    <div class="mt-20">
+                        <label for="update" class="">Ticket Update:</label>
+                        <textarea  name="update" id="update" class="form-input" placeholder="Enter Updates on  Your Ticket" required></textarea>
+                    </div>
+                    <div>
+                        <input type="submit" class="btn w-100 mt-20 btn-primary" value="Add">
+                    </div>
+                 </form>
+            </div>
+        </div>
+    </div>
+</div>

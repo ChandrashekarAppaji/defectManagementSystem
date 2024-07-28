@@ -1,0 +1,29 @@
+{% include 'manager_head.html' %}
+<div class="mt-130">
+    <div class="w-30 margin-auto">
+        <div class="card p-20">
+            <form action="assign_to_developer_action">
+                <div>
+                    <input type="hidden" value="{{ticket_id}}" name="ticket_id">
+                </div>
+                <div class="card-label">
+                    <div>Assign To Developer</div>
+                </div>
+                <div class="mt-20">
+                      <label>Choose Developer:</label>
+                      <select class="form-input" name="developer_id" required>
+                        <option value="">Choose Developer</option>
+                        {% for developer in developers %}
+                        <option value="{{developer['_id']}}">
+                            {{developer['first_name']}} {{developer['last_name']}}
+                        </option>
+                        {% endfor %}
+                      </select>
+                </div>
+                <div class="mt-10">
+                        <input type="submit" class="btn w-100 mt-20" value="Assign Developer">
+                    </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+{% include 'main_head.html' %}
+
+<div class="mt-120">
+    <div class=" ">
+        <div class="w-30 margin-auto">
+            <div class="card p-20">
+                <form action="admin_login_action" method="post">
+                    <div class="flex">
+                        <div>
+                          <img src="https://img.freepik.com/free-photo/3d-rendered-illustration-businessman-with-laptop-books_1057-45897.jpg?ga=GA1.1.1312216658.1718106846&semt=sph" class="card-img">
+                        </div>
+                         <div class="card-label mt-40">Admin Login</div>
+                    </div>
+                    <div class="mt-20">
+                        <label for="username" class="">Username:</label>
+                        <input type="text" name="username" id="username" class="form-input" placeholder="Please Enter Username" required>
+                    </div>
+                     <div class="mt-10">
+                        <label for="password">Password:</label>
+                        <input type="password" name="password" id="password" class="form-input" placeholder="Please Enter Password" required>
+                    </div>
+                    <div>
+                        <input type="submit" class="btn w-100 mt-20 btn-primary " value="Submit">
+                    </div>
+                 </form>
+            </div>
+        </div>
+    </div>
+</div>

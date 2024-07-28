@@ -1,0 +1,32 @@
+{% include 'main_head.html' %}
+
+<div class="mt-120">
+    <div class=" ">
+        <div class="w-30 margin-auto">
+            <div class="card p-20">
+                <form action="user_login_action" method="post">
+                    <div class="flex">
+                        <div>
+                          <img src="https://img.freepik.com/premium-vector/man-with-shirt-that-says-hes-real-man_169196-13461.jpg?ga=GA1.1.1312216658.1718106846" class="card-img ml-30">
+                        </div>
+                         <div class="card-label mt-50 ">User  Login</div>
+                    </div>
+                    <div class="mt-20">
+                        <label for="email" class="">Email:</label>
+                        <input type="email" name="email" id="email" class="form-input" placeholder="Please Enter Email" required>
+                    </div>
+                     <div class="mt-10">
+                        <label for="password">Password:</label>
+                        <input type="password" name="password" id="password" class="form-input" placeholder="Please Enter Password" required>
+                    </div>
+                    <div class="mt-30">
+                        <input type="submit" class="btn w-100 mt-20 btn-primary " value="Submit">
+                    </div>
+                 </form>
+                 <div class="mt-20">
+                      <div class=" "><a href="user_registration" class="btn">Create Account</a></div>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>

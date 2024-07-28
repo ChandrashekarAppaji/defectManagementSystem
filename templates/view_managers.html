@@ -1,0 +1,29 @@
+{% include "admin_head.html" %}
+<div class="mt-110">
+    <div class="card-label">View Managers</div>
+</div>
+
+<div class="mt-10">
+    <div class="row space-around">
+        <div class="w-90">
+            <div class="card mt-20 p-20">
+                <table class="table w-100">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Experience</th>
+                    </tr>
+                    {% for manager in managers %}
+                    <tr>
+                        <td>{{manager['first_name']}} {{manager['last_name']}}</td>
+                        <td>{{manager['email']}}</td>
+                        <td>{{manager['phone']}}</td>
+                        <td>{{manager['experience']}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
