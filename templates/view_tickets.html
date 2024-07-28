@@ -93,7 +93,7 @@
                          </div>
                      </div>
                      {% if session['role'] == 'manager' %}
-                       {% if ticket['status']=='Ticket Raise' %}
+                       {% if ticket['status']=='Open' %}
                          <div class="mt-165">
                             <div class=""><a href="accept_ticket?ticket_id={{ticket['_id']}}" class="btn">Accept Ticket</a></div>
                          </div>
@@ -106,19 +106,19 @@
                             <div class=""><a href="assign_to_developer?ticket_id={{ticket['_id']}}" class="btn">Assign Developer</a></div>
                          </div>
                        {% endif %}
-                        {% if ticket['status']=='Ticket Assigned to Developer',ticket['status']=='Ticket In Process' %}
+                        {% if ticket['status']=='Ticket Assigned to Developer',ticket['status']=='Ticket In Progress' %}
                              <div class="mt-165 ml-10">
                                 <div class=""><a href="close_ticket?ticket_id={{ticket['_id']}}" class="btn">Close Ticket</a></div>
                              </div>
                         {% endif %}
                      {% endif %}
                      {% if session['role'] == 'developer' %}
-                        {% if ticket['status']=='Ticket Assigned to Developer', ticket['status']=='Ticket In Process'%}
+                        {% if ticket['status']=='Ticket Assigned to Developer', ticket['status']=='Ticket In Progress'%}
                          <div class="mt-120">
                             <div class=""><a href="close_ticket?ticket_id={{ticket['_id']}}" class="btn">Close Ticket</a></div>
                            {% if ticket['status']=='Ticket Assigned to Developer' %}
                            <div class="mt-10">
-                             <div class=""><a href="ticket_in_process?ticket_id={{ticket['_id']}}" class="btn">Ticket In Process</a></div>
+                             <div class=""><a href="ticket_in_progress?ticket_id={{ticket['_id']}}" class="btn">Ticket In Progress</a></div>
                            </div>
                            {% endif %}
                          {% endif %}

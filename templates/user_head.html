@@ -5,8 +5,14 @@
         <div>
             <img src="../static/project_images/Defect.png" class="logo">
         </div>
+        <div>
+            {% if name %}
+             <p>{{ name }}</p>
+            {% endif %}
+        </div>
     </div>
     <div class="nav-item mt-10">
+        <div><a href="/user_home" class="nav-menu-item">{{message}}</a></div>
         <div><a href="/user_home" class="nav-menu-item">User Home</a></div>
         <div><a href="/raise_ticket" class="nav-menu-item">Raise Ticket</a></div>
         <div><a href="/view_tickets" class="nav-menu-item">View Ticket</a></div>

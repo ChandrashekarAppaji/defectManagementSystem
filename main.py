@@ -8,7 +8,6 @@ import os
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 Raise_ticket_images_files_path = APP_ROOT + "/static/raise_ticket_images"
 
-
 my_client = pymongo.MongoClient("mongodb://localhost:27017")
 my_database = my_client["Defect_Management_System"]
 admin_collection = my_database["admin"]
@@ -73,7 +72,7 @@ def user_registration_action():
     if count > 0:
         return render_template("msg.html", message="Phone Number already Registered")
     user = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone, "password": password,
-              "state": state, "city": city, "address": address, "zip_code": zip_code}
+            "state": state, "city": city, "address": address, "zip_code": zip_code}
     user_collection.insert_one(user)
     return render_template("msg.html", message="Your Registration Successfully")
 
@@ -114,7 +113,7 @@ def manager_action():
     phone = request.form.get("phone")
     password = request.form.get("password")
     experience = request.form.get("experience")
-    query = {"email":email}
+    query = {"email": email}
     count = manager_collection.count_documents(query)
     if count > 0:
         return render_template("admin_message.html", message="This email already Exist!")
@@ -122,7 +121,8 @@ def manager_action():
     count = manager_collection.count_documents(query)
     if count > 0:
         return render_template("admin_message.html", message="This phone number already Exist!")
-    query = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone, "password": password, "experience": experience}
+    query = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone, "password": password,
+             "experience": experience}
     manager_collection.insert_one(query)
     return render_template("admin_message.html", message="Manager added successfully")
 
@@ -161,7 +161,8 @@ def add_developer_action():
     count = developer_collection.count_documents(query)
     if count > 0:
         return render_template("admin_message.html", message="This phone number already Exist!")
-    query = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone, "password": password, "experience": experience,
+    query = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone, "password": password,
+             "experience": experience,
              "skills": skills, "address": address, "city": city, "state": state, "zip_code": zip_code}
     developer_collection.insert_one(query)
     return render_template("admin_message.html", message="Developer added successfully")
@@ -185,12 +186,13 @@ def logout():
 def user_login_action():
     email = request.form.get("email")
     password = request.form.get("password")
-    query = {"email": email,"password": password}
+    query = {"email": email, "password": password}
     count = user_collection.count_documents(query)
     if count > 0:
         user = user_collection.find_one(query)
         session['role'] = 'user'
         session['user_id'] = str(user['_id'])
+        session['name'] = str(user['first_name']) + ' [User]'
         return redirect("/user_home")
     else:
         return render_template("msg.html", message="Invalid Email and Password")
@@ -198,7 +200,9 @@ def user_login_action():
 
 @app.route("/user_home")
 def user_home():
-    return render_template("user_home.html")
+    if 'user_id' in session:
+        name = session['name']
+    return render_template("user_home.html", name=name)
 
 
 @app.route("/raise_ticket")
@@ -215,14 +219,17 @@ def raise_ticket_action():
     path = Raise_ticket_images_files_path + "/" + picture.filename
     picture.save(path)
     user_id = session['user_id']
-    query = {"ticket_title": ticket_title, "description": description, "picture": picture.filename, "date": date, "user_id":ObjectId(user_id), "status": 'Ticket Raise'}
+    query = {"ticket_title": ticket_title, "description": description, "picture": picture.filename, "date": date,
+             "user_id": ObjectId(user_id), "status": 'Open'}
     result = tickets_collection.insert_one(query)
     ticket_id = result.inserted_id
     notification_title = "New Ticket Raised"
     notification_description = description
     date = datetime.datetime.today()
     user_id = session['user_id']
-    query = {"_id": ObjectId(ticket_id), "notification_title":notification_title, "notification_description": notification_description, "date": date, "user_id": ObjectId(user_id),"ticket_id": ObjectId(ticket_id)}
+    query = {"_id": ObjectId(ticket_id), "notification_title": notification_title,
+             "notification_description": notification_description, "date": date, "user_id": ObjectId(user_id),
+             "ticket_id": ObjectId(ticket_id)}
     notifications_collection.insert_one(query)
     return render_template("user_message.html", message="Ticket added successfully")
 
@@ -240,7 +247,12 @@ def view_tickets():
         query = {"user_id": ObjectId(user_id)}
     tickets = tickets_collection.find(query)
     tickets = list(tickets)
-    return render_template("view_tickets.html", get_manager_by_manager_id=get_manager_by_manager_id, tickets=tickets, get_ticket_by_manager_id=get_ticket_by_manager_id, get_ticket_by_developer_id=get_ticket_by_developer_id, get_ticket_by_user_id=get_ticket_by_user_id,get_developer_by_developer_id=get_developer_by_developer_id, get_user_by_user_id=get_user_by_user_id)
+    return render_template("view_tickets.html", get_manager_by_manager_id=get_manager_by_manager_id, tickets=tickets,
+                           get_ticket_by_manager_id=get_ticket_by_manager_id,
+                           get_ticket_by_developer_id=get_ticket_by_developer_id,
+                           get_ticket_by_user_id=get_ticket_by_user_id,
+                           get_developer_by_developer_id=get_developer_by_developer_id,
+                           get_user_by_user_id=get_user_by_user_id)
 
 
 @app.route("/project_manager_login_action", methods=['post'])
@@ -253,6 +265,7 @@ def project_manager_login_action():
         manager = manager_collection.find_one(query)
         session['role'] = 'manager'
         session['manager_id'] = str(manager['_id'])
+        session['name'] = str(manager['first_name']) + '[Project_Manager]'
         return redirect("/manager_home")
     else:
         return render_template("msg.html", message="Invalid Email and Password")
@@ -260,7 +273,9 @@ def project_manager_login_action():
 
 @app.route("/manager_home")
 def manager_home():
-    return render_template("manager_home.html")
+    if 'manager_id' in session:
+        name = session['name']
+    return render_template("manager_home.html", name=name)
 
 
 @app.route("/accept_ticket")
@@ -268,12 +283,13 @@ def accept_ticket():
     ticket_id = request.args.get("ticket_id")
     manager_id = session['manager_id']
     query1 = {"_id": ObjectId(ticket_id)}
-    query2 = {"$set": {"status": "Ticket Accepted","manager_id": ObjectId(manager_id)}}
-    tickets_collection.update_one(query1,query2)
+    query2 = {"$set": {"status": "Ticket Accepted", "manager_id": ObjectId(manager_id)}}
+    tickets_collection.update_one(query1, query2)
     notification_title = "Ticket Accepted"
     notification_description = "The " + session['role'] + " updated status as Ticket Accepted"
     date = datetime.datetime.now()
-    query = {"notification_title": notification_title, "notification_description":notification_description, "date":date,"ticket_id":ObjectId(ticket_id) }
+    query = {"notification_title": notification_title, "notification_description": notification_description,
+             "date": date, "ticket_id": ObjectId(ticket_id)}
     notifications_collection.insert_one(query)
     return redirect("/view_tickets")
 
@@ -283,7 +299,7 @@ def reject_ticket():
     ticket_id = request.args.get("ticket_id")
     query1 = {"_id": ObjectId(ticket_id)}
     query2 = {"$set": {"status": "Ticket Rejected"}}
-    tickets_collection.update_one(query1,query2)
+    tickets_collection.update_one(query1, query2)
     notification_title = "Ticket Rejected"
     notification_description = "The " + session['role'] + " updated status as Ticket Rejected"
     date = datetime.datetime.now()
@@ -298,7 +314,7 @@ def close_ticket():
     ticket_id = request.args.get("ticket_id")
     query1 = {"_id": ObjectId(ticket_id)}
     query2 = {"$set": {"status": "Ticket Closed"}}
-    tickets_collection.update_one(query1,query2)
+    tickets_collection.update_one(query1, query2)
     notification_title = "Ticket Closed"
     notification_description = "The " + session['role'] + " updated status as Ticket Closed"
     date = datetime.datetime.now()
@@ -324,6 +340,7 @@ def developer_login_action():
         developer = developer_collection.find_one(query)
         session['role'] = 'developer'
         session['developer_id'] = str(developer['_id'])
+        session['name'] = str(developer['first_name']) + '[Developer]'
         return redirect("/developer_home")
     else:
         return render_template("msg.html", message="Invalid Email and Password")
@@ -331,7 +348,9 @@ def developer_login_action():
 
 @app.route("/developer_home")
 def developer_home():
-    return render_template("developer_home.html")
+    if 'developer_id' in session:
+        name = session['name']
+    return render_template("developer_home.html", name=name)
 
 
 @app.route("/assign_to_developer")
@@ -359,19 +378,20 @@ def assign_to_developer_action():
     return render_template("manager_message.html", message="Developer Assigned Successfully")
 
 
-@app.route("/ticket_in_process")
+@app.route("/ticket_in_progress")
 def ticket_in_process():
     ticket_id = request.args.get("ticket_id")
     query1 = {"_id": ObjectId(ticket_id)}
-    query2 = {"$set": {"status": "Ticket In Process"}}
+    query2 = {"$set": {"status": "Ticket In Progress"}}
     tickets_collection.update_one(query1, query2)
-    notification_title = "Ticket In Process"
-    notification_description = "The" + session['role'] + "updated status as Ticket In Process"
+    notification_title = "Ticket In Progress"
+    notification_description = "The " + session['role'] + " updated status as Ticket In Progress"
     date = datetime.datetime.now()
     query = {"notification_title": notification_title, "notification_description": notification_description,
              "date": date, "ticket_id": ObjectId(ticket_id)}
     notifications_collection.insert_one(query)
     return redirect("/view_tickets")
+
 
 def get_ticket_by_manager_id(manger_id):
     query = {"_id": manger_id}
@@ -397,15 +417,17 @@ def add_comment_action():
     ticket_id = request.args.get("ticket_id")
     date = datetime.datetime.now()
     if session['role'] == 'manager':
-        query = {"comment": comment, "manager_id":ObjectId(session['manager_id']), "role": session['role'], "date": date}
+        query = {"comment": comment, "manager_id": ObjectId(session['manager_id']), "role": session['role'],
+                 "date": date}
     elif session['role'] == 'developer':
-            query = {"comment": comment, "developer_id": ObjectId(session['developer_id']), "role": session['role'], "date": date}
+        query = {"comment": comment, "developer_id": ObjectId(session['developer_id']), "role": session['role'],
+                 "date": date}
     elif session['role'] == 'user':
-            query = {"comment": comment, "user_id": ObjectId(session['user_id']), "role": session['role'], "date": date}
+        query = {"comment": comment, "user_id": ObjectId(session['user_id']), "role": session['role'], "date": date}
 
     query1 = {"_id": ObjectId(ticket_id)}
     query2 = {"$push": {"comments": query}}
-    tickets_collection.update_one(query1,query2)
+    tickets_collection.update_one(query1, query2)
     return redirect("/view_tickets")
 
 
@@ -413,6 +435,7 @@ def get_developer_by_developer_id(developer_id):
     query = {"_id": developer_id}
     developers = developer_collection.find_one(query)
     return developers
+
 
 def get_manager_by_manager_id(manager_id):
     manager = manager_collection.find_one({"_id": ObjectId(manager_id)})
@@ -427,7 +450,7 @@ def get_user_by_user_id(user_id):
 @app.route("/add_ticket_update")
 def add_ticket_update():
     ticket_id = request.args.get("ticket_id")
-    return render_template("add_ticket_update.html",ticket_id=ticket_id)
+    return render_template("add_ticket_update.html", ticket_id=ticket_id)
 
 
 @app.route("/add_ticket_update_action")
@@ -457,7 +480,7 @@ def view_ticket_updates():
 @app.route("/manager_notifications")
 def manager_notifications():
     manager_id = session['manager_id']
-    query = {"manager_id":ObjectId(manager_id)}
+    query = {"manager_id": ObjectId(manager_id)}
     tickets = tickets_collection.find(query)
     ticket_ids = []
     for ticket in tickets:
@@ -470,7 +493,7 @@ def manager_notifications():
 @app.route("/user_notifications")
 def user_notifications():
     user_id = session['user_id']
-    query = {"user_id":ObjectId(user_id)}
+    query = {"user_id": ObjectId(user_id)}
     tickets = tickets_collection.find(query)
     ticket_ids = []
     for ticket in tickets:
@@ -483,7 +506,7 @@ def user_notifications():
 @app.route("/developer_notifications")
 def developer_notifications():
     developer_id = session['developer_id']
-    query = {"developer_id":ObjectId(developer_id)}
+    query = {"developer_id": ObjectId(developer_id)}
     tickets = tickets_collection.find(query)
     ticket_ids = []
     for ticket in tickets:
@@ -491,6 +514,11 @@ def developer_notifications():
     query = {"ticket_id": {"$in": ticket_ids}}
     notifications = notifications_collection.find(query)
     return render_template("developer_notifications.html", notifications=notifications)
+
+
+@app.context_processor
+def inject_user():
+    return dict(name=session.get('name'))
 
 
 app.run(debug=True)
