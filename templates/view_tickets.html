@@ -52,6 +52,19 @@
                                      <div class="">Phone:</div>
                                      <div class="ml-10 txt-blue">{{manager['phone']}}</div>
                                  </div>
+                                 {% else %}
+                                 <div>
+                                     <div class="">Manager Name:</div>
+                                     <div class="ml-10 txt-blue">None            </div>
+                                 </div>
+                                 <div>
+                                     <div class="">Email:</div>
+                                     <div class="ml-10 txt-blue">None            </div>
+                                 </div>
+                                 <div>
+                                     <div class="">Phone:</div>
+                                     <div class="ml-10 txt-blue">None            </div>
+                                 </div>                                 
                                  {% endif %}
                                  <div class="">
                                      <div class="mt-20">
@@ -76,6 +89,19 @@
                              <div class="">Phone:</div>
                              <div class="ml-10 txt-blue">{{developer['phone']}}</div>
                          </div>
+                         {% else %}
+                         <div>
+                             <div class="">Developer Name:</div>
+                             <div class="ml-10 txt-blue">None            </div>
+                         </div>
+                         <div>
+                             <div class="">Email:</div>
+                             <div class="ml-10 txt-blue">None            </div>
+                         </div>
+                         <div>
+                             <div class="">Phone:</div>
+                             <div class="ml-10 txt-blue">None            </div>
+                         </div>                         
                          {% endif%}
                      </div>
                       <div class="mt-60">
@@ -107,15 +133,19 @@
                          </div>
                        {% endif %}
                         {% if ticket['status']=='Ticket Assigned to Developer',ticket['status']=='Ticket In Progress' %}
+                            {% if ticket['status'] != 'Ticket Closed' %}
                              <div class="mt-165 ml-10">
                                 <div class=""><a href="close_ticket?ticket_id={{ticket['_id']}}" class="btn">Close Ticket</a></div>
                              </div>
+                            {% endif %}
                         {% endif %}
                      {% endif %}
                      {% if session['role'] == 'developer' %}
-                        {% if ticket['status']=='Ticket Assigned to Developer', ticket['status']=='Ticket In Progress'%}
+                        {% if ticket['status']=='Ticket Assigned to Developer', ticket['status']=='Ticket In Progress',ticket['status'] != 'Ticket Closed'%}
                          <div class="mt-120">
+                             {% if ticket['status'] != 'Ticket Closed' %}
                             <div class=""><a href="close_ticket?ticket_id={{ticket['_id']}}" class="btn">Close Ticket</a></div>
+                             {% endif %}
                            {% if ticket['status']=='Ticket Assigned to Developer' %}
                            <div class="mt-10">
                              <div class=""><a href="ticket_in_progress?ticket_id={{ticket['_id']}}" class="btn">Ticket In Progress</a></div>
