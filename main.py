@@ -4,11 +4,16 @@ from bson import ObjectId
 from flask import Flask, render_template, request, session, redirect
 import pymongo
 import os
+from config import Config
 
-APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-Raise_ticket_images_files_path = APP_ROOT + "/static/raise_ticket_images"
+#APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+#Raise_ticket_images_files_path = APP_ROOT + "/static/raise_ticket_images"
+app = Flask(__name__)
+app.secret_key = "defect_management"
+app.config.from_object(Config)
 
-my_client = pymongo.MongoClient("mongodb://localhost:27017")
+Raise_ticket_images_files_path = app.config['UPLOAD_FOLDER']
+my_client = pymongo.MongoClient(app.config['MONGO_URI'])
 my_database = my_client["Defect_Management_System"]
 admin_collection = my_database["admin"]
 developer_collection = my_database["developer"]
@@ -18,8 +23,7 @@ tickets_collection = my_database["tickets"]
 ticket_updates_collection = my_database["ticket_updates"]
 notifications_collection = my_database["notifications"]
 
-app = Flask(__name__)
-app.secret_key = "defect_management"
+
 
 
 @app.route("/")
