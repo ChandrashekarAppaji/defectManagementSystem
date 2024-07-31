@@ -1,0 +1,102 @@
+{% include "admin_head.html" %}
+<div class="mt-120">
+    <div class="row">
+        <div class="w-75 margin-auto">
+            <div class="card p-20">
+                {% if message %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endif %}
+
+                <!-- Form for assigning members to projects -->
+                <form action="/assign_to_project_action" method="post">
+                    <div class="card-label">Assign to Project</div>
+                    <div class="mt-20">
+                        <label for="project_id" class="">Select Project:</label>
+                        <select name="project_id" id="project_id" class="form-input" required>
+                            {% for project in projects %}
+                            <option value="{{ project._id }}">{{ project.project_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mt-20">
+                        <label for="manager_id" class="">Select Manager:</label>
+                        <select name="manager_id" id="manager_id" class="form-input" required>
+                            {% for manager in managers %}
+                            <option value="{{ manager._id }}">{{ manager.first_name }} {{ manager.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mt-20">
+                        <label for="developer_id" class="">Select Developer:</label>
+                        <select name="developer_id" id="developer_id" class="form-input" required>
+                            {% for developer in developers %}
+                            <option value="{{ developer._id }}">{{ developer.first_name }} {{ developer.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <input type="submit" class="btn w-100 mt-20 btn-primary" value="Assign to Project">
+                    </div>
+                </form>
+
+                <!-- Display projects and their associated members -->
+                <h3 class="mt-40">Projects and Members</h3>
+                <table class="table table-bordered mt-20">
+                    <thead>
+                        <tr>
+                            <th>Project Name</th>
+                            <th>Managers</th>
+                            <th>Developers</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if project_data %}
+                        {% for project in project_data %}
+                        <tr>
+                            <td>{{ project.project_name }}</td>
+                            <td>
+                                {% if project.managers %}
+                                <ul class="list-unstyled">
+                                    {% for manager in project.managers %}
+                                    <li>{{ manager.first_name }} {{ manager.last_name }} ({{ manager.email }})</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                No managers assigned
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if project.developers %}
+                                <ul class="list-unstyled">
+                                    {% for developer in project.developers %}
+                                    <li>{{ developer.first_name }} {{ developer.last_name }} ({{ developer.email }})</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                No developers assigned
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="3">No projects found</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

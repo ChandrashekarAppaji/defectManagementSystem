@@ -1,43 +1,83 @@
-{% include 'admin_head.html' %}
-<div class="mt-120">
-    <div class="row space-around">
+{% include "admin_head.html" %}
 
-        <div class="w-30">
+<div class="mt-110">
+    <div class="card-label">Manage Project Managers</div>
+</div>
+
+<!-- Add Project Manager Form -->
+<div class="mt-10">
+    <div class="row space-around">
+        <div class="w-40">
             <div class="card p-20">
-                <form action="add_manager_action" , method="post">
+                <form action="add_manager_action" method="post">
                     <div class="card-label">
                         <div>Add Project Manager</div>
                     </div>
-                        <div class=" ">
-                            <div class="mt-20">
-                                <label for="first_name">First Name:</label>
-                                <input type="text" id="first_name" name="first_name" class="form-input" placeholder="Enter First Name" required>
-                            </div>
-                            <div class="mt-10">
-                                <label for="last_name">Last Name:</label>
-                                <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Enter Last Name" required>
-                            </div>
-                            <div class="mt-10">
-                                <label for="email">Email:</label>
-                                <input type="email" id="email" name="email" class="form-input" placeholder="Enter Email" required>
-                            </div>
-                            <div class="mt-10">
-                                <label for="phone">Phone:</label>
-                                <input type="tel" id="phone" name="phone" class="form-input" placeholder="Enter Phone" required>
-                            </div>
-                            <div class="mt-10">
-                                <label for="password">Password:</label>
-                                <input type="password" id="password" name="password" class="form-input" placeholder="Enter Password" required>
-                            </div>
-                            <div class="mt-20">
-                                <label for="experience">Experience:</label>
-                                <input type="number" id="experience" name="experience" class="form-input" placeholder="Enter  Experience" required>
-                            </div>
+                    <div class=" ">
+                        <div class="mt-20">
+                            <label for="first_name">First Name:</label>
+                            <input type="text" id="first_name" name="first_name" class="form-input" placeholder="Enter First Name" required>
                         </div>
                         <div class="mt-10">
-                            <input type="submit" class="btn  w-100 mt-20" value="Submit">
+                            <label for="last_name">Last Name:</label>
+                            <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Enter Last Name" required>
                         </div>
+                        <div class="mt-10">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" class="form-input" placeholder="Enter Email" required>
+                        </div>
+                        <div class="mt-10">
+                            <label for="phone">Phone:</label>
+                            <input type="tel" id="phone" name="phone" class="form-input" placeholder="Enter Phone" required>
+                        </div>
+                        <div class="mt-10">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" name="password" class="form-input" placeholder="Enter Password" required>
+                        </div>
+                        <div class="mt-10">
+                            <label for="experience">Experience:</label>
+                            <input type="number" id="experience" name="experience" class="form-input" placeholder="Enter Experience" required>
+                        </div>
+                        <div class="mt-10">
+                            <label for="address">Address:</label>
+                            <input type="text" id="address" name="address" class="form-input" placeholder="Enter Address" required>
+                        </div>
+                        <div class="mt-10">
+                            <label for="dob">Date of Birth:</label>
+                            <input type="date" id="dob" name="dob" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="mt-10">
+                        <input type="submit" class="btn w-100 mt-20" value="Submit">
+                    </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- View Managers Table -->
+        <div class="w-50">
+            <div class="card mt-20 p-20">
+                <div class="card-label">Current Managers</div>
+                <table class="table w-100 mt-20">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Experience</th>
+                        <th>Address</th>
+                        <th>Date of Birth</th>
+                    </tr>
+                    {% for manager in managers %}
+                    <tr>
+                        <td>{{ manager['first_name'] }} {{ manager['last_name'] }}</td>
+                        <td>{{ manager['email'] }}</td>
+                        <td>{{ manager['phone'] }}</td>
+                        <td>{{ manager['experience'] }}</td>
+                        <td>{{ manager['address'] }}</td>
+                        <td>{{ manager['dob'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
             </div>
         </div>
     </div>

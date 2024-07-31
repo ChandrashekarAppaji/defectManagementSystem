@@ -1,13 +1,13 @@
 import datetime
 
 from bson import ObjectId
-from flask import Flask, render_template, request, session, redirect
+from flask import Flask, render_template, request, session, redirect, flash, url_for
 import pymongo
 import os
 from config import Config
 
-#APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-#Raise_ticket_images_files_path = APP_ROOT + "/static/raise_ticket_images"
+# APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+# Raise_ticket_images_files_path = APP_ROOT + "/static/raise_ticket_images"
 app = Flask(__name__)
 app.secret_key = "defect_management"
 app.config.from_object(Config)
@@ -20,10 +20,9 @@ developer_collection = my_database["developer"]
 user_collection = my_database["user"]
 manager_collection = my_database["manager"]
 tickets_collection = my_database["tickets"]
-ticket_updates_collection = my_database["ticket_updates"]
+ticket_updates_collection = my_database["status"]
 notifications_collection = my_database["notifications"]
-
-
+projects_collection = my_database["projects"]
 
 
 @app.route("/")
@@ -49,6 +48,11 @@ def developer_login():
 @app.route("/user_login")
 def user_login():
     return render_template("user_login.html")
+
+
+@app.route("/add_project")
+def add_project():
+    return render_template("add_project.html")
 
 
 @app.route("/user_registration")
@@ -81,11 +85,134 @@ def user_registration_action():
     return render_template("msg.html", message="Your Registration Successfully")
 
 
+'''
 query = {}
 count = admin_collection.count_documents(query)
 if count == 0:
     query = {"username": "admin", "password": "admin"}
     admin_collection.insert_one(query)
+'''
+
+
+@app.route("/add_project_action", methods=['post'])
+def add_project_action():
+    project_name = request.form.get("project_name")
+    description = request.form.get("description")
+
+    project_data = {
+        "project_name": project_name,
+        "description": description,
+        "managers": [],
+        "developers": []
+    }
+
+    projects_collection.insert_one(project_data)
+    return render_template("admin_message.html", message="Project created successfully")
+
+
+@app.route("/assign_to_project")
+def assign_to_project():
+    query = {}
+    developers = developer_collection.find(query)
+    managers = manager_collection.find(query)
+    projects = projects_collection.find(query)
+    developers = list(developers)
+    managers = list(managers)
+    projects = list(projects)
+
+    # Create dictionaries for quick lookup
+    manager_dict = {str(manager['_id']): manager for manager in managers}
+    developer_dict = {str(developer['_id']): developer for developer in developers}
+
+    # Prepare the data for rendering
+    project_data = []
+    for project in projects:
+        project_id = str(project['_id'])
+        project_name = project.get("project_name", "Unknown")
+
+        # Get managers and developers for the current project
+        current_managers = [manager_dict.get(str(manager_id)) for manager_id in project.get("managers", [])]
+        current_developers = [developer_dict.get(str(developer_id)) for developer_id in project.get("developers", [])]
+
+        project_data.append({
+            "project_name": project_name,
+            "managers": current_managers,
+            "developers": current_developers
+        })
+
+    return render_template("assign_to_project.html",projects=projects,managers=managers,developers=developers,project_data=project_data)
+
+
+@app.route("/assign_to_project_action", methods=['POST'])
+def assign_to_project_action():
+    project_id = request.form.get("project_id")
+    manager_id = request.form.get("manager_id")
+    developer_id = request.form.get("developer_id")
+
+    # Fetch the current project details
+    project = projects_collection.find_one({"_id": ObjectId(project_id)})
+
+    # Initialize the message
+    message = "Assigned to project successfully"
+
+    if manager_id:
+        # Check if the manager is already assigned to the project
+        if ObjectId(manager_id) in project.get("managers", []):
+            message = "Manager is already assigned to the project"
+        else:
+            projects_collection.update_one(
+                {"_id": ObjectId(project_id)},
+                {"$addToSet": {"managers": ObjectId(manager_id)}}
+            )
+
+    if developer_id:
+        # Check if the developer is already assigned to the project
+        if ObjectId(developer_id) in project.get("developers", []):
+            message = "Developer is already assigned to the project"
+        else:
+            projects_collection.update_one(
+                {"_id": ObjectId(project_id)},
+                {"$addToSet": {"developers": ObjectId(developer_id)}}
+            )
+
+    # Fetch all projects, managers, and developers
+    projects = list(projects_collection.find())
+    managers = list(manager_collection.find())
+    developers = list(developer_collection.find())
+
+    # Print debug information
+    print(f"Projects: {projects}")
+    print(f"Managers: {managers}")
+    print(f"Developers: {developers}")
+
+
+    # Create dictionaries for quick lookup
+    manager_dict = {str(manager['_id']): manager for manager in managers}
+    developer_dict = {str(developer['_id']): developer for developer in developers}
+
+    # Prepare the data for rendering
+    project_data = []
+    for project in projects:
+        project_id = str(project['_id'])
+        project_name = project.get("project_name", "Unknown")
+
+        # Get managers and developers for the current project
+        current_managers = [manager_dict.get(str(manager_id)) for manager_id in project.get("managers", [])]
+        current_developers = [developer_dict.get(str(developer_id)) for developer_id in project.get("developers", [])]
+
+        project_data.append({
+            "project_name": project_name,
+            "managers": current_managers,
+            "developers": current_developers
+        })
+
+    return render_template(
+        "assign_to_project.html",
+        projects=projects,
+        managers=managers,
+        developers=developers,
+        message=message,project_data=project_data
+    )
 
 
 @app.route("/admin_login_action", methods=['post'])
@@ -106,7 +233,11 @@ def admin_home():
 
 @app.route("/add_manager")
 def add_manager():
-    return render_template("add_manager.html")
+    query = {}
+    managers = manager_collection.find(query)
+    managers = list(managers)
+    # return render_template("view_managers.html", managers=managers)
+    return render_template("add_manager.html", managers=managers)
 
 
 @app.route("/add_manager_action", methods=['post'])
@@ -117,16 +248,32 @@ def manager_action():
     phone = request.form.get("phone")
     password = request.form.get("password")
     experience = request.form.get("experience")
+    address = request.form.get("address")
+    dob = request.form.get("dob")
+
+    # Check for duplicate email
     query = {"email": email}
     count = manager_collection.count_documents(query)
     if count > 0:
-        return render_template("admin_message.html", message="This email already Exist!")
+        return render_template("admin_message.html", message="This email already exists!")
+
+    # Check for duplicate phone number
     query = {"phone": phone}
     count = manager_collection.count_documents(query)
     if count > 0:
-        return render_template("admin_message.html", message="This phone number already Exist!")
-    query = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone, "password": password,
-             "experience": experience}
+        return render_template("admin_message.html", message="This phone number already exists!")
+
+    # Insert new manager
+    query = {
+        "first_name": first_name,
+        "last_name": last_name,
+        "email": email,
+        "phone": phone,
+        "password": password,
+        "experience": experience,
+        "address": address,
+        "dob": dob
+    }
     manager_collection.insert_one(query)
     return render_template("admin_message.html", message="Manager added successfully")
 
@@ -141,7 +288,11 @@ def view_managers():
 
 @app.route("/add_developer")
 def add_developer():
-    return render_template("add_developer.html")
+    query = {}
+    developers = developer_collection.find(query)
+    developers = list(developers)
+    # return render_template("view_developers.html", developers=developers)
+    return render_template("add_developer.html", developers=developers)
 
 
 @app.route("/add_developer_action", methods=['post'])
@@ -209,9 +360,10 @@ def user_home():
     return render_template("user_home.html", name=name)
 
 
-@app.route("/raise_ticket")
+@app.route("/raise_ticket", methods=['GET'])
 def raise_ticket():
-    return render_template("raise_ticket.html")
+    projects = projects_collection.find()
+    return render_template("raise_ticket.html", projects=projects)
 
 
 @app.route("/raise_ticket_action", methods=['post'])
@@ -223,40 +375,108 @@ def raise_ticket_action():
     path = Raise_ticket_images_files_path + "/" + picture.filename
     picture.save(path)
     user_id = session['user_id']
-    query = {"ticket_title": ticket_title, "description": description, "picture": picture.filename, "date": date,
-             "user_id": ObjectId(user_id), "status": 'Open'}
-    result = tickets_collection.insert_one(query)
+    project_id = request.form.get("project_id")
+
+    # Create ticket entry
+    ticket_data = {
+        "ticket_title": ticket_title,
+        "description": description,
+        "picture": picture.filename,
+        "date": date,
+        "user_id": ObjectId(user_id),
+        "status": 'Open',
+        "project_id": ObjectId(project_id)
+    }
+    result = tickets_collection.insert_one(ticket_data)
     ticket_id = result.inserted_id
-    notification_title = "New Ticket Raised"
-    notification_description = description
-    date = datetime.datetime.today()
-    user_id = session['user_id']
-    query = {"_id": ObjectId(ticket_id), "notification_title": notification_title,
-             "notification_description": notification_description, "date": date, "user_id": ObjectId(user_id),
-             "ticket_id": ObjectId(ticket_id)}
-    notifications_collection.insert_one(query)
+
+    # Create notification entry
+    notification_data = {
+        "notification_title": "New Ticket Raised",
+        "notification_description": description,
+        "date": date,
+        "user_id": ObjectId(user_id),
+        "ticket_id": ObjectId(ticket_id)
+    }
+    notifications_collection.insert_one(notification_data)
+
+    # Flash message or render template
     return render_template("user_message.html", message="Ticket added successfully")
 
 
 @app.route("/view_tickets")
 def view_tickets():
-    if session['role'] == 'developer':
-        developer_id = session['developer_id']
-        query = {"developer_id": ObjectId(developer_id)}
-    elif session['role'] == 'manager':
+    user_role = session['role']
+
+    if user_role == 'manager':
+        # Fetch projects managed by the manager
         manager_id = session['manager_id']
-        query = {}
-    elif session['role'] == 'user':
+        projects = projects_collection.find({"managers": ObjectId(manager_id)})
+        project_ids = [project['_id'] for project in projects]
+        tickets = tickets_collection.find({
+            "project_id": {"$in": project_ids},
+            "$or": [
+                {"manager_id": {"$exists": False}},  # Manager ID does not exist
+                {"manager_id": ObjectId(manager_id)}  # Manager ID matches
+            ]
+        })
+
+
+    elif user_role == 'developer':
+        # Fetch projects assigned to the developer
+        developer_id = session['developer_id']
+        projects = projects_collection.find({"developers": ObjectId(developer_id)})
+        project_ids = [project['_id'] for project in projects]
+        tickets = tickets_collection.find({"project_id": {"$in": project_ids}})
+        tickets = tickets_collection.find({
+            "project_id": {"$in": project_ids},
+            "developer_id": ObjectId(developer_id)
+        })
+    else:
+        # Fetch tickets raised by the
         user_id = session['user_id']
-        query = {"user_id": ObjectId(user_id)}
-    tickets = tickets_collection.find(query)
+        projects = projects_collection.find({})
+        project_ids = [project['_id'] for project in projects]
+        tickets = tickets_collection.find({"user_id": ObjectId(user_id)})
+
     tickets = list(tickets)
+    for ticket in tickets:
+        print(f"Original ticket: {ticket}")
+        if 'project_id' in ticket and isinstance(ticket['project_id'], ObjectId):
+            ticket['project_id'] = str(ticket['project_id'])
+        print(f"Processed ticket: {ticket}")
     return render_template("view_tickets.html", get_manager_by_manager_id=get_manager_by_manager_id, tickets=tickets,
                            get_ticket_by_manager_id=get_ticket_by_manager_id,
                            get_ticket_by_developer_id=get_ticket_by_developer_id,
                            get_ticket_by_user_id=get_ticket_by_user_id,
                            get_developer_by_developer_id=get_developer_by_developer_id,
-                           get_user_by_user_id=get_user_by_user_id)
+                           get_user_by_user_id=get_user_by_user_id,
+                           get_project_by_id=get_project_by_id)
+
+
+@app.route("/change_password_action", methods=['POST'])
+def change_password_action():
+    email = request.form.get("email")
+    current_password = request.form.get("current_password")
+    new_password = request.form.get("new_password")
+    confirm_new_password = request.form.get("confirm_new_password")
+
+    if new_password != confirm_new_password:
+        return render_template("admin_message.html", message="New passwords do not match!")
+
+    # Find the manager by email
+    manager = manager_collection.find_one({"email": email})
+
+    if manager and manager['password'] == current_password:
+        manager_collection.update_one({"email": email}, {"$set": {"password": new_password}})
+        return render_template("admin_message.html", message="Password changed successfully")
+    else:
+        return render_template("admin_message.html", message="Current password is incorrect or email not found!")
+
+
+@app.route("/change_password", methods=['GET'])
+def change_password():
+    return render_template("change_password.html")
 
 
 @app.route("/project_manager_login_action", methods=['post'])
@@ -360,9 +580,29 @@ def developer_home():
 @app.route("/assign_to_developer")
 def assign_to_developer():
     ticket_id = request.args.get("ticket_id")
-    query = {}
-    developers = developer_collection.find(query)
+
+    # Fetch the ticket to get the project_id
+    ticket = tickets_collection.find_one({"_id": ObjectId(ticket_id)})
+    if not ticket:
+        return "Ticket not found", 404
+
+    project_id = ticket.get("project_id")
+
+    if not project_id:
+        return "Project ID not found in ticket", 404
+
+    # Fetch the project to get the list of developer IDs
+    project = projects_collection.find_one({"_id": project_id})
+    if not project:
+        return "Project not found", 404
+
+    # Get the list of developer IDs for the project
+    developer_ids = project.get("developers", [])
+
+    # Fetch all developers but filter by those who are in the project
+    developers = developer_collection.find({"_id": {"$in": developer_ids}})
     developers = list(developers)
+
     return render_template("assign_to_developer.html", developers=developers, ticket_id=ticket_id)
 
 
@@ -413,6 +653,16 @@ def get_ticket_by_user_id(user_id):
     query = {"_id": user_id}
     users = user_collection.find_one(query)
     return users
+
+
+def get_project_by_id(project_id):
+    try:
+        if isinstance(project_id, str):
+            project_id = ObjectId(project_id)  # Convert string back to ObjectId
+        return projects_collection.find_one({"_id": project_id})
+    except Exception as e:
+        print(f"Error fetching project by ID {project_id}: {e}")
+        return None
 
 
 @app.route("/add_comment_action")

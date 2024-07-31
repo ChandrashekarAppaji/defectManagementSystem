@@ -5,11 +5,19 @@
         <div class="row space-around">
             <div class="w-30">
                 <div class="card p-20">
-                    <form action="raise_ticket_action" , method="post" enctype="multipart/form-data">
+                    <form action="raise_ticket_action" method="post" enctype="multipart/form-data">
                         <div class="card-label">
                             <div>Raise Ticket</div>
                         </div>
                         <div class="">
+                            <div class="mt-20">
+                                <label for="project_id">Select Project:</label>
+                                <select name="project_id" id="project_id" class="form-input" required>
+                                    {% for project in projects %}
+                                    <option value="{{ project._id }}">{{ project.project_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                             <div class="mt-20">
                                 <label for="ticket_title">Ticket Title:</label>
                                 <input type="text" id="ticket_title" name="ticket_title" class="form-input" placeholder="Enter Ticket Title" required>
@@ -20,7 +28,7 @@
                             </div>
                             <div class="mt-10">
                                 <label for="description">Description:</label>
-                                <textarea id="description" name="description" class="form-input"  placeholder="Enter Description" required></textarea>
+                                <textarea id="description" name="description" class="form-input" placeholder="Enter Description" required></textarea>
                             </div>
                         </div>
                         <div class="mt-10">

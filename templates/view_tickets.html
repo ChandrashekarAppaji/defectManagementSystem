@@ -25,6 +25,8 @@
              {% set developer = get_ticket_by_developer_id(ticket['developer_id']) %}
              {% endif %}
              {% set user = get_ticket_by_user_id(ticket['user_id']) %}
+             {% set project = get_project_by_id(ticket['project_id']) %}
+
              <div class="card p-10 ml-10 mr-10 mt-30">
                  <div class="flex gap-20">
                      <div class="">
@@ -64,7 +66,7 @@
                                  <div>
                                      <div class="">Phone:</div>
                                      <div class="ml-10 txt-blue">None            </div>
-                                 </div>                                 
+                                 </div>
                                  {% endif %}
                                  <div class="">
                                      <div class="mt-20">
@@ -101,7 +103,7 @@
                          <div>
                              <div class="">Phone:</div>
                              <div class="ml-10 txt-blue">None            </div>
-                         </div>                         
+                         </div>
                          {% endif%}
                      </div>
                       <div class="mt-60">
@@ -118,6 +120,15 @@
                              <div class="ml-10 txt-blue">{{user['phone']}}</div>
                          </div>
                      </div>
+
+                     <!-- New Project Details Section -->
+                     <div class="mt-60">
+                         <div>
+                             <div class="">Project:</div>
+                             <div class="ml-10 txt-blue">{{project['project_name']}}</div>
+                         </div>
+                     </div>
+
                      {% if session['role'] == 'manager' %}
                        {% if ticket['status']=='Open' %}
                          <div class="mt-165">
@@ -193,7 +204,6 @@
                              <div><h3>Comments</h3></div>
                              {% for comment in ticket['comments'] %}
 
-
                              <div class="mt-20 row space-between">
                                  <div class="flex">
                                      <div class="bold">Commented By:</div>
@@ -221,7 +231,7 @@
                                  </div>
                              </div>
                              <hr>
-                             {% endfor%}
+                             {% endfor %}
                          </div>
                      </div>
                  </div>
@@ -231,4 +241,3 @@
         </div>
     </div>
 </div>
-
