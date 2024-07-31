@@ -70,6 +70,7 @@ def user_registration_action():
     address = request.form.get("address")
     city = request.form.get("city")
     state = request.form.get("state")
+    dob = request.form.get("dob")
     zip_code = request.form.get("zip_code")
     query = {"email": email}
     count = user_collection.count_documents(query)
@@ -80,7 +81,7 @@ def user_registration_action():
     if count > 0:
         return render_template("msg.html", message="Phone Number already Registered")
     user = {"first_name": first_name, "last_name": last_name, "email": email, "phone": phone, "password": password,
-            "state": state, "city": city, "address": address, "zip_code": zip_code}
+            "state": state,"dob":dob, "city": city, "address": address, "zip_code": zip_code}
     user_collection.insert_one(user)
     return render_template("msg.html", message="Your Registration Successfully")
 
