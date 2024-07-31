@@ -545,12 +545,6 @@ def close_ticket():
     query = {"notification_title": notification_title, "notification_description": notification_description,
              "date": date, "ticket_id": ObjectId(ticket_id)}
     notifications_collection.insert_one(query)
-    notification_title = "Ticket Closed"
-    notification_description = "The " + session['role'] + " updated status as Ticket Closed"
-    date = datetime.datetime.now()
-    query = {"notification_title": notification_title, "notification_description": notification_description,
-             "date": date, "ticket_id": ObjectId(ticket_id)}
-    notifications_collection.insert_one(query)
     return redirect("/view_tickets")
 
 
@@ -725,8 +719,8 @@ def add_ticket_update_action():
 
 @app.route("/view_ticket_updates")
 def view_ticket_updates():
-    query = {}
-    ticket_updates = ticket_updates_collection.find(query)
+    ticket_id = request.args.get("ticket_id")
+    ticket_updates = ticket_updates_collection.find({"ticket_id": ObjectId(ticket_id)})
     ticket_updates = list(ticket_updates)
     return render_template("view_ticket_updates.html", ticket_updates=ticket_updates)
 
