@@ -521,8 +521,9 @@ def accept_ticket():
 @app.route("/reject_ticket")
 def reject_ticket():
     ticket_id = request.args.get("ticket_id")
+    manager_id = session['manager_id']
     query1 = {"_id": ObjectId(ticket_id)}
-    query2 = {"$set": {"status": "Ticket Rejected"}}
+    query2 = {"$set": {"status": "Ticket Rejected",  "manager_id": ObjectId(manager_id)}}
     tickets_collection.update_one(query1, query2)
     notification_title = "Ticket Rejected"
     notification_description = "The " + session['role'] + " updated status as Ticket Rejected"
@@ -536,8 +537,9 @@ def reject_ticket():
 @app.route("/close_ticket")
 def close_ticket():
     ticket_id = request.args.get("ticket_id")
+    manager_id = session['manager_id']
     query1 = {"_id": ObjectId(ticket_id)}
-    query2 = {"$set": {"status": "Ticket Closed"}}
+    query2 = {"$set": {"status": "Ticket Closed" , "manager_id": ObjectId(manager_id)}}
     tickets_collection.update_one(query1, query2)
     notification_title = "Ticket Closed"
     notification_description = "The " + session['role'] + " updated status as Ticket Closed"
