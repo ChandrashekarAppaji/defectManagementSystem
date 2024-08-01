@@ -4,6 +4,7 @@ from bson import ObjectId
 from flask import Flask, render_template, request, session, redirect, flash, url_for
 import pymongo
 import os
+from datetime import datetime
 from config import Config
 
 # APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -94,6 +95,15 @@ if count == 0:
     admin_collection.insert_one(query)
 '''
 
+def format_date(date_str):
+    try:
+        # Convert the date string to a datetime object
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        # Format the datetime object to 'Month-Day-Year'
+        return date_obj.strftime("%B-%d-%Y")
+    except ValueError:
+        return date_str  # Return the original string if conversion fails
+app.jinja_env.filters['format_date'] = format_date
 
 @app.route("/add_project_action", methods=['post'])
 def add_project_action():
@@ -480,27 +490,46 @@ def change_password():
     return render_template("change_password.html")
 
 
-@app.route("/project_manager_login_action", methods=['post'])
+@app.route("/project_manager_login_action", methods=['POST'])
 def project_manager_login_action():
     email = request.form.get("email")
     password = request.form.get("password")
     query = {"email": email, "password": password}
-    count = manager_collection.count_documents(query)
-    if count > 0:
-        manager = manager_collection.find_one(query)
-        session['role'] = 'manager'
-        session['manager_id'] = str(manager['_id'])
-        session['name'] = str(manager['first_name']) + '[Project_Manager]'
-        return redirect("/manager_home")
+    manager = manager_collection.find_one(query)
+
+    if manager:
+        if manager.get('password_changed', False):
+            session['role'] = 'manager'
+            session['manager_id'] = str(manager['_id'])
+            session['name'] = str(manager['first_name']) + '[Project_Manager]'
+            return redirect("/manager_home")
+        else:
+            # Redirect to password change page
+            session['role'] = 'manager'
+            session['manager_id'] = str(manager['_id'])
+            return redirect("/manager_change_password")
     else:
         return render_template("msg.html", message="Invalid Email and Password")
+
+@app.route("/manager_change_password", methods=['GET', 'POST'])
+def manager_change_password():
+    if request.method == 'POST':
+        new_password = request.form.get("new_password")
+        manager_id = session.get('manager_id')
+        if manager_id and new_password:
+            manager_collection.update_one(
+                {"_id": ObjectId(manager_id)},
+                {"$set": {"password": new_password, "password_changed": True}}
+            )
+            return redirect("/manager_home")
+        return render_template("msg.html", message="Failed to change password")
+
+    return render_template("manager_change_password.html")
 
 
 @app.route("/manager_home")
 def manager_home():
-    if 'manager_id' in session:
-        name = session['name']
-    return render_template("manager_home.html", name=name)
+    return render_template("manager_home.html")
 
 
 @app.route("/accept_ticket")

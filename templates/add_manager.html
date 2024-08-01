@@ -74,7 +74,7 @@
                         <td>{{ manager['phone'] }}</td>
                         <td>{{ manager['experience'] }}</td>
                         <td>{{ manager['address'] }}</td>
-                        <td>{{ manager['dob'] }}</td>
+                        <td>{{ manager['dob'] | format_date }}</td>
                     </tr>
                     {% endfor %}
                 </table>
